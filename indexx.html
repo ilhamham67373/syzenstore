@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SryzenStore - Minecraft Services</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-purple: #9d4edd;
+            --dark-purple: #1a022d;
+            --mc-green: #55ff55;
+            --light-gray: #f8f9fa;
+        }
+
+        /* Smooth Scroll */
+        html { scroll-behavior: smooth; }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light-gray);
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* --- NAVIGASI --- */
+        .navbar { position: fixed; top: 20px; right: 20px; z-index: 2000; }
+        .menu-toggle {
+            background: var(--primary-purple);
+            width: 55px; height: 55px;
+            border-radius: 15px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .menu-toggle i { font-size: 26px; color: white; }
+
+        .nav-menu {
+            position: fixed; top: 0; right: -100%;
+            width: 300px; height: 100vh;
+            background: rgba(13, 1, 24, 0.98);
+            backdrop-filter: blur(10px);
+            padding: 100px 40px;
+            transition: 0.4s ease-in-out;
+            z-index: 1999;
+        }
+        .nav-menu.active { right: 0; }
+        .nav-menu ul { list-style: none; padding: 0; }
+        .nav-menu ul li { margin-bottom: 30px; }
+        .nav-menu ul li a {
+            color: white; text-decoration: none; font-size: 1.3rem;
+            display: flex; align-items: center; gap: 20px; transition: 0.3s;
+        }
+        .nav-menu ul li a:hover { color: var(--primary-purple); padding-left: 10px; }
+
+        /* --- HERO --- */
+        .hero {
+            background: linear-gradient(rgba(13, 1, 24, 0.7), rgba(13, 1, 24, 0.7)), 
+                        url('https://images.unsplash.com/photo-1627398242454-45a1465c2479?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover; background-position: center;
+            height: 450px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; text-align: center; color: white;
+        }
+        .main-logo img { width: 140px; border: 3px solid var(--primary-purple); border-radius: 50%; padding: 10px; }
+        .store-name { font-family: 'Orbitron', sans-serif; font-size: 3rem; margin: 15px 0 0; }
+
+        /* --- SECTION TENTANG --- */
+        section { padding: 80px 20px; text-align: center; }
+        .divider { width: 60px; height: 4px; background: var(--primary-purple); margin: 15px auto 30px; }
+        h2 { font-family: 'Orbitron', sans-serif; color: var(--dark-purple); }
+
+        /* --- RATING & TESTIMONI --- */
+        #reviews { background: #eef1f4; }
+        .reviews-container {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px; max-width: 1100px; margin: 0 auto;
+        }
+        .review-card {
+            background: white; padding: 25px; border-radius: 20px;
+            text-align: left; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-bottom: 4px solid var(--primary-purple);
+        }
+        .stars-display { color: #ffcc00; font-size: 1.2rem; margin-bottom: 10px; }
+        .review-card h4 { margin: 0; color: var(--dark-purple); }
+        .review-card p { font-style: italic; color: #666; font-size: 0.9rem; }
+
+        /* --- BUTTON ORDER (Trigger Rating) --- */
+        .btn-trigger {
+            background: var(--primary-purple); color: white; padding: 15px 40px;
+            border-radius: 50px; border: none; font-weight: bold; cursor: pointer;
+            font-size: 1.1rem; transition: 0.3s; margin-top: 20px;
+        }
+        .btn-trigger:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(157, 78, 221, 0.4); }
+
+        /* --- KONTAK --- */
+        #contact { background: white; }
+        .contact-icons { display: flex; justify-content: center; gap: 30px; margin-top: 30px; }
+        .contact-icons a { font-size: 2.5rem; color: var(--dark-purple); transition: 0.3s; }
+        .contact-icons a:hover { color: var(--primary-purple); transform: translateY(-5px); }
+
+        /* --- MODAL FORM --- */
+        .modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
+        .modal-content {
+            background: var(--dark-purple); margin: 5% auto; padding: 30px;
+            width: 90%; max-width: 400px; border-radius: 20px; color: white;
+            border: 1px solid var(--primary-purple);
+        }
+        input, textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #444; background: #000; color: white; box-sizing: border-box; }
+        
+        /* Input Rating Bintang */
+        .rating-input { display: flex; flex-direction: row-reverse; justify-content: center; margin-bottom: 15px; }
+        .rating-input input { display: none; }
+        .rating-input label { font-size: 35px; color: #444; cursor: pointer; transition: 0.2s; }
+        .rating-input input:checked ~ label, .rating-input label:hover, .rating-input label:hover ~ label { color: #ffcc00; }
+
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="menu-toggle" onclick="toggleMenu()">
+            <i class="fas fa-bars" id="menuIcon"></i>
+        </div>
+    </nav>
+
+    <div class="nav-menu" id="sideMenu">
+        <ul>
+            <li><a href="#" onclick="toggleMenu()"><i class="fas fa-home"></i> Beranda</a></li>
+            <li><a href="#tentang" onclick="toggleMenu()"><i class="fas fa-info-circle"></i> Tentang</a></li>
+            <li><a href="#reviews" onclick="toggleMenu()"><i class="fas fa-star"></i> Testimoni</a></li>
+            <li><a href="#contact" onclick="toggleMenu()"><i class="fas fa-phone"></i> Kontak</a></li>
+        </ul>
+    </div>
+
+    <section class="hero" id="home">
+        <div class="main-logo">
+            <img src="https://cdn.discordapp.com/attachments/1387760508236464319/1455911540934049864/872527e9b53bc3b479b9787731bb5cab.jpg?ex=695672c8&is=69552148&hm=d33e26f510667153de6faa7f8496d5d942dde5467927a366738851618750cd13&" alt="Logo">
+        </div>
+        <h1 class="store-name">SyzenStore</h1>
+        <p>Best Minecraft Setup & All Service Help</p>
+    </section>
+
+    <section id="tentang">
+        <h2>Tentang Kami</h2>
+        <div class="divider"></div>
+        <p style="max-width: 800px; margin: 0 auto; line-height: 1.8;">
+            SyzenStore adalah jasa penyedia kebutuhan Minecraft terbaik. Kami fokus pada kualitas Jasa , pelayanan, dan kepuasan pelanggan. Kami tidak lagi hanya menjual barang, kami menjual pengalaman bermain yang luar biasa.
+        </p>
+        <button class="btn-trigger" onclick="openModal()">Kirim Testimoni / Pesanan</button>
+    </section>
+
+    <section id="reviews">
+        <h2>Testimoni Pelanggan</h2>
+        <div class="divider"></div>
+        <div class="reviews-container" id="reviewsList">
+            </div>
+    </section>
+
+    <section id="contact">
+        <h2>Hubungi Admin</h2>
+        <div class="divider"></div>
+        <div class="contact-icons">
+            <a href="https://wa.me/62822454e2748" target="_blank"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://www.instagram.com/syzenstoreoffc?igsh=OTRpN28xODVhNjJw" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://discord.gg/FxtFypxRVr" target="_blank"><i class="fab fa-discord"></i></a>
+        </div>
+        <p style="margin-top: 20px; opacity: 0.6;">&copy; 2025 SyzenStore - All Rights Reserved</p>
+    </section>
+
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <h3>Kirim Feedback</h3>
+            <form id="ratingForm">
+                <input type="text" id="userName" placeholder="Nama / IGN" required>
+                <textarea id="comment" placeholder="Berikan komentar/pesanan..." rows="3" required></textarea>
+                
+                <label>Rating Anda:</label>
+                <div class="rating-input">
+                    <input type="radio" name="star" id="st5" value="5"><label for="st5">★</label>
+                    <input type="radio" name="star" id="st4" value="4"><label for="st4">★</label>
+                    <input type="radio" name="star" id="st3" value="3"><label for="st3">★</label>
+                    <input type="radio" name="star" id="st2" value="2"><label for="st2">★</label>
+                    <input type="radio" name="star" id="st1" value="1" required><label for="st1">★</label>
+                </div>
+
+                <button type="submit" class="btn-trigger" style="width:100%; margin-top:10px;">Posting & Kirim WA</button>
+                <button type="button" onclick="closeModal()" style="background:none; border:none; color:gray; width:100%; margin-top:15px; cursor:pointer;">Batal</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Hamburger Menu Logic
+        function toggleMenu() {
+            const menu = document.getElementById('sideMenu');
+            const icon = document.getElementById('menuIcon');
+            menu.classList.toggle('active');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+        }
+
+        // Modal Logic
+        function openModal() { document.getElementById('orderModal').style.display = 'block'; }
+        function closeModal() { document.getElementById('orderModal').style.display = 'none'; }
+
+        // --- SISTEM RATING & TESTIMONI ---
+        const reviewsList = document.getElementById('reviewsList');
+
+        function loadReviews() {
+            const data = JSON.parse(localStorage.getItem('sryzen_ratings')) || [];
+            if(data.length === 0) {
+                reviewsList.innerHTML = "<p>Belum ada testimoni. Jadilah yang pertama!</p>";
+                return;
+            }
+            reviewsList.innerHTML = data.map(item => `
+                <div class="review-card">
+                    <div class="stars-display">${'★'.repeat(item.star)}${'☆'.repeat(5-item.star)}</div>
+                    <h4>${item.name}</h4>
+                    <p>"${item.text}"</p>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('ratingForm').onsubmit = function(e) {
+            e.preventDefault();
+            const name = document.getElementById('userName').value;
+            const text = document.getElementById('comment').value;
+            const star = document.querySelector('input[name="star"]:checked').value;
+
+            // Simpan ke LocalStorage
+            const data = JSON.parse(localStorage.getItem('sryzen_ratings')) || [];
+            data.unshift({ name, text, star: parseInt(star) });
+            localStorage.setItem('sryzen_ratings', JSON.stringify(data));
+
+            // Kirim ke WA
+            const waUrl = `https://wa.me/6282245432748?text=Halo Admin!%0ANama: ${name}%0ARating: ${star} Bintang%0APesan: ${text}`;
+            
+            window.open(waUrl, '_blank');
+            loadReviews(); // Refresh list
+            closeModal();
+            this.reset();
+        }
+
+        // Inisialisasi awal
+        loadReviews();
+
+        // Close modal if clicked outside
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('orderModal')) closeModal();
+        }
+    </script>
+</body>
+</html>
